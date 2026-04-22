@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>交通安全违法·裁量情节计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            background: #f5f7fb;
+            padding: 16px 12px 32px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f6;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px dashed #d1d9e6;
+            padding-bottom: 10px;
+        }
+        .card-title i {
+            color: #3b82f6;
+            font-style: normal;
+            font-size: 1.3rem;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            display: block;
+            color: #334155;
+        }
+        select, input[type="number"], .fake-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.15s;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0 8px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: #2563eb;
+            flex-shrink: 0;
+        }
+        .checkbox-item label {
+            margin-bottom: 0;
+            font-weight: 400;
+            line-height: 1.4;
+            color: #1e293b;
+        }
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .special-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px 14px;
+            margin: 16px 0 8px;
+            border-left: 4px solid #94a3b8;
+        }
+        .badge {
+            background: #e6edfb;
+            color: #1e4bd2;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        /* 结果框：天蓝色 */
+        .result-box {
+            background: #d4e9ff;
+            color: #0b1e2c;
+            padding: 22px 20px;
+            border-radius: 28px;
+            margin-top: 24px;
+            box-shadow: 0 12px 24px -8px rgba(0,80,140,0.2);
+            border: 1px solid #b2d0f0;
+        }
+        .result-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            color: #1e3a5f;
+            font-weight: 500;
+        }
+        .result-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.5;
+            word-break: break-word;
+            color: #022c49;
+        }
+        .calc-info {
+            font-size: 0.9rem;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(27, 55, 96, 0.2);
+            display: flex;
+            justify-content: space-between;
+            opacity: 0.9;
+            color: #1e415e;
+        }
+        .btn-calc {
+            background: #1e4bd2;
+            border: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 6px 12px rgba(30,75,210,0.25);
+            border: 1px solid #3b6eff;
+        }
+        .btn-calc:hover {
+            background: #1540b0;
+        }
+        .inline-hint {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        .flex-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .number-input-small {
+            width: 100px;
+            padding: 8px 12px;
+            margin-left: 8px;
+            display: inline-block;
+        }
+        .waiting-text {
+            opacity: 0.7;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚖️ 杭州交管交通安全违法行为行政处罚裁量计算器</h1>
+    <div class="subtitle">依据《浙江省公安机关部分道路交通安全违法行为行政处罚裁量基准》</div>
+
+    <!-- 违法行为选择 -->
+    <div class="card">
+        <div class="card-title"><i>📋</i> 选择违法行为</div>
+        <select id="violationSelect" aria-label="违法行为"></select>
+        <div class="inline-hint">切换违法行为将自动重置所有情节选项</div>
+    </div>
+
+    <!-- 动态特殊选项区域 -->
+    <div id="dynamicSpecialPanel" class="card" style="display: none;">
+        <div class="card-title"><i>⚙️</i> 特殊情节认定</div>
+        <div id="specialContent"></div>
+    </div>
+
+    <!-- 从重情节 (通用) -->
+    <div class="card">
+        <div class="card-title"><i>🔴</i> 从重裁量情节 <span class="badge">每项计正数</span></div>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="heavy1" value="1">
+                <label for="heavy1">涉及校车、中型以上载客载货汽车(不含大型轿车)、危险化学品运输车</label>
+            </div>
+            <div class="checkbox-item flex-row">
+                <input type="checkbox" id="heavyHistoryEnabled" style="width:20px;">
+                <label for="heavyHistoryEnabled" style="flex:1;">本次违法前2年内有同一种违法被处罚记录</label>
+                <div style="display: flex; align-items: center; margin-left: auto;">
+                    <span style="margin-right: 6px;font-size:0.9rem;">次数</span>
+                    <input type="number" id="heavyHistoryCount" min="0" max="10" value="1" style="width:80px; padding:8px; border-radius:40px; border:1px solid #ccc;" disabled>
+                </div>
+            </div>
+            <div class="radio-group" style="margin-top: 8px;">
+                <label style="font-weight:500;">交通事故后果 (单选，计从重情节)</label>
+                <div class="radio-item">
+                    <input type="radio" name="accidentHeavy" id="accNone" value="0" checked>
+                    <label for="accNone">无 / 不涉及</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="accidentHeavy" id="accDuty" value="2">
+                    <label for="accDuty">造成交通事故且负有事故责任 <span style="color:#b45309;">(计2个从重)</span></label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="accidentHeavy" id="accSerious" value="3">
+                    <label for="accSerious">造成人员重伤或者死亡 <span style="color:#b91c1c;">(计3个从重)</span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 从轻情节 (通用) -->
+    <div class="card">
+        <div class="card-title"><i>🟢</i> 从轻裁量情节 <span class="badge">每项计负数</span></div>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="light1" value="1">
+                <label for="light1">已满14周岁未满18周岁</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="light2" value="1">
+                <label for="light2">主动投案，如实陈述违法行为</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="light3" value="1">
+                <label for="light3">主动消除或减轻危害后果</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="light4" value="1">
+                <label for="light4">涉及摩托车/非标电动自行车/低速电动三(四)轮车</label>
+            </div>
+        </div>
+        <div id="extraLightContainer" style="margin-top: 8px;"></div>
+        <div class="inline-hint">※ 特殊违法另有从轻项(如注销可恢复、行人/非机动车)将自动显示</div>
+    </div>
+
+    <!-- 计算按钮 -->
+    <button class="btn-calc" id="calcBtn">计算</button>
+
+    <!-- 结果展示 - 天蓝色背景 -->
+    <div class="result-box" id="resultBox">
+        <div class="result-label">📌 处罚裁量建议</div>
+        <div class="result-text" id="penaltyDisplay">—— 点击「计算」查看 ——</div>
+        <div class="calc-info">
+            <span id="plotCountDisplay">裁量情节数: —</span>
+            <span id="alcInfoDisplay"></span>
+        </div>
+    </div>
+    <div style="font-size:0.8rem; text-align:center; margin-top:20px; color:#6b7280;">@杭州市公安局交通管理支队执法监督大队</div>
+</div>
+
+<script>
+    (function(){
+        "use strict";
+
+        // ---------- 违法行为列表 (18项) ----------
+        const VIOLATIONS = [
+            "1. 饮酒后驾驶机动车",
+            "2. 再次饮酒后驾驶机动车",
+            "3. 无有效机动车驾驶证驾驶机动车",
+            "4. 将机动车交由无有效机动车驾驶证人员驾驶",
+            "5. 伪造、变造或者使用伪造、变造的机动车登记证书、号牌、行驶证、驾驶证",
+            "6. 伪造、变造或者使用伪造、变造的检验合格标志、保险标志",
+            "7. 使用其他车辆的机动车登记证书、号牌、行驶证、检验合格标志、保险标志",
+            "8. 驾驶与准驾车型不符的车辆、驾驶证超过有效期、违法记分达到十二分或者被公告停止使用期间仍驾驶机动车、持境外机动车驾驶证驾驶机动车",
+            "9. 交通肇事逃逸",
+            "10. 机动车行驶超速50%以上",
+            "11. 强迫机动车驾驶人违规驾驶机动车造成交通事故",
+            "12. 违反交通管制强行通行",
+            "13. 故意损毁、移动、涂改交通设施",
+            "14. 非法拦截、扣留机动车",
+            "15. 驾驶拼装机动车、驾驶报废机动车",
+            "16. 使用未取得校车标牌的车辆、使用未取得校车驾驶资格的人员",
+            "17. 出具虚假机动车安全技术检验结果",
+            "18. 非法安装警报器、标志灯具"
+        ];
+
+        // DOM 元素
+        const selectEl = document.getElementById('violationSelect');
+        const dynamicPanel = document.getElementById('dynamicSpecialPanel');
+        const specialContent = document.getElementById('specialContent');
+        const penaltyDisplay = document.getElementById('penaltyDisplay');
+        const plotCountDisplay = document.getElementById('plotCountDisplay');
+        const calcBtn = document.getElementById('calcBtn');
+
+        // 从重元素
+        const heavy1 = document.getElementById('heavy1');
+        const heavyHistoryEnabled = document.getElementById('heavyHistoryEnabled');
+        const heavyHistoryCount = document.getElementById('heavyHistoryCount');
+        const accidentRadios = document.getElementsByName('accidentHeavy');
+        // 从轻通用
+        const light1 = document.getElementById('light1');
+        const light2 = document.getElementById('light2');
+        const light3 = document.getElementById('light3');
+        const light4 = document.getElementById('light4');
+
+        // 初始化下拉
+        function initSelect() {
+            selectEl.innerHTML = '';
+            VIOLATIONS.forEach((v, idx) => {
+                const option = document.createElement('option');
+                option.value = idx;
+                option.textContent = v;
+                selectEl.appendChild(option);
+            });
+        }
+        initSelect();
+
+        // ---------- 重置所有选项 (保留违法行为不变) ----------
+        function resetAllOptions() {
+            // 从重
+            heavy1.checked = false;
+            heavyHistoryEnabled.checked = false;
+            heavyHistoryCount.value = 1;
+            heavyHistoryCount.disabled = true;
+            document.getElementById('accNone').checked = true;
+            // 从轻
+            light1.checked = false;
+            light2.checked = false;
+            light3.checked = false;
+            light4.checked = false;
+            // 特殊面板重新渲染 (会重置里面的值)
+            const vioIdx = parseInt(selectEl.value);
+            renderSpecialPanel(vioIdx);
+            // 清空处罚显示为等待状态
+            penaltyDisplay.textContent = '—— 点击「计算」查看 ——';
+            plotCountDisplay.textContent = '裁量情节数: —';
+        }
+
+        // 历史次数联动
+        heavyHistoryEnabled.addEventListener('change', (e) => {
+            heavyHistoryCount.disabled = !e.target.checked;
+            if (!e.target.checked) heavyHistoryCount.value = 0;
+            else if (heavyHistoryCount.value == 0) heavyHistoryCount.value = 1;
+            updatePlotCountOnly(); // 仅更新情节数预览
+        });
+        heavyHistoryCount.addEventListener('input', updatePlotCountOnly);
+
+        // 通用监听 (仅更新情节数)
+        const allInputs = [heavy1, heavyHistoryEnabled, light1, light2, light3, light4];
+        allInputs.forEach(el => el.addEventListener('change', updatePlotCountOnly));
+        accidentRadios.forEach(r => r.addEventListener('change', updatePlotCountOnly));
+
+        // 切换违法行为：自动重置并清空处罚显示
+        selectEl.addEventListener('change', () => {
+            resetAllOptions();
+            updatePlotCountOnly();
+        });
+
+        // 仅更新情节数显示 (不改变处罚结果)
+        function updatePlotCountOnly() {
+            const net = getNetPlotCount();
+            plotCountDisplay.textContent = `裁量情节数: ${net}`;
+        }
+
+        // 计算从重总数
+        function calcHeavyTotal() {
+            let total = 0;
+            if (heavy1.checked) total += 1;
+            if (heavyHistoryEnabled.checked) {
+                let cnt = parseInt(heavyHistoryCount.value) || 0;
+                total += cnt;
+            }
+            for (let radio of accidentRadios) {
+                if (radio.checked) {
+                    total += parseInt(radio.value) || 0;
+                    break;
+                }
+            }
+            return total;
+        }
+
+        // 计算从轻基础
+        function calcLightBase() {
+            let base = 0;
+            if (light1.checked) base += 1;
+            if (light2.checked) base += 1;
+            if (light3.checked) base += 1;
+            if (light4.checked) base += 1;
+            return base;
+        }
+
+        // 额外从轻
+        function getExtraLightFromSpecial() {
+            let extra = 0;
+            const vioIdx = parseInt(selectEl.value);
+            if (vioIdx === 2 || vioIdx === 3) {
+                const recoverChk = document.getElementById('special_recover');
+                if (recoverChk && recoverChk.checked) extra += 2;
+            }
+            if (vioIdx === 8) {
+                const pedestrianChk = document.getElementById('special_pedestrian');
+                if (pedestrianChk && pedestrianChk.checked) extra += 1;
+            }
+            return extra;
+        }
+
+        function getNetPlotCount() {
+            return calcHeavyTotal() - (calcLightBase() + getExtraLightFromSpecial());
+        }
+
+        // ---------- 渲染特殊面板 (每次重置时调用) ----------
+        function renderSpecialPanel(vioIdx) {
+            if (isNaN(vioIdx)) return;
+            let html = '';
+            dynamicPanel.style.display = 'block';
+            
+            if (vioIdx === 0 || vioIdx === 1) {
+                html = `<label>🍺 酒精含量 (mg/100ml) </label>
+                        <input type="number" id="alcoholInput" min="0" step="1" value="0" style="width:100%;">
+                        <div class="inline-hint">输入数值，用于判断裁量阶次</div>`;
+            } else if (vioIdx === 2 || vioIdx === 3) {
+                html = `<div class="checkbox-item"><input type="checkbox" id="special_army"> <label>仅持军队、武警驾驶证驾驶地方机动车</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="special_recover"> <label>驾驶证符合注销可恢复法定情形 <span style="color:#15803d;">(计2个从轻)</span></label></div>`;
+            } else if (vioIdx === 8) {
+                html = `<div class="radio-group"><label>事故后果类型</label>
+                        <div class="radio-item"><input type="radio" name="escapeType" value="minor" id="escMinor" checked> <label for="escMinor">逃逸事故致人轻微伤或财损尚不构成犯罪</label></div>
+                        <div class="radio-item"><input type="radio" name="escapeType" value="serious" id="escSerious"> <label for="escSerious">逃逸事故致人轻伤以上或死亡尚不构成犯罪</label></div>
+                        </div>
+                        <div class="checkbox-item"><input type="checkbox" id="special_pedestrian"> <label>违法行为人系行人或者非机动车驾驶人 <span style="color:#15803d;">(计1个从轻)</span></label></div>`;
+            } else if (vioIdx === 9) {
+                html = `<label>🏁 超速特殊情形 (可多选，选中任一项即并处吊销驾驶证)</label>`;
+                const speedItems = [
+                    "在最高限速40km/h以下道路上行驶速度100km/h以上",
+                    "在最高限速50km/h道路上行驶速度115km/h以上",
+                    "在最高限速60km/h道路上行驶速度130km/h以上",
+                    "在高速公路外且限速70km/h以上道路行驶145km/h以上",
+                    "在限速70-80km/h高速行驶160km/h以上",
+                    "在限速90km/h以上高速行驶180km/h以上",
+                    "校车/中型以上客货车/危化品车 限速60以下道路100km/h以上或超50%",
+                    "造成他人重伤或死亡交通事故，负同等责任以上",
+                    "造成社会恶劣影响"
+                ];
+                speedItems.forEach((txt, i) => {
+                    html += `<div class="checkbox-item"><input type="checkbox" class="speed-special" id="speed_${i}" value="${i}"> <label>${txt}</label></div>`;
+                });
+            } else if (vioIdx === 10) {
+                html = `<div class="radio-group"><label>事故后果</label>
+                        <div class="radio-item"><input type="radio" name="forceType" value="minor" checked> 造成轻微伤或财损</div>
+                        <div class="radio-item"><input type="radio" name="forceType" value="serious"> 轻伤以上或死亡</div></div>`;
+            } else if (vioIdx === 11) {
+                html = `<div class="radio-group"><label>违法主体</label>
+                        <div class="radio-item"><input type="radio" name="controlType" value="nonmotor" checked> 驾驶非机动车或行人</div>
+                        <div class="radio-item"><input type="radio" name="controlType" value="motor"> 驾驶机动车</div></div>`;
+            } else if (vioIdx === 7) {
+                html = `<div class="checkbox-item"><input type="checkbox" id="special_accident8"> <label>造成交通事故的 (直接处1000元罚款)</label></div>`;
+            } else {
+                dynamicPanel.style.display = 'none';
+            }
+            specialContent.innerHTML = html;
+            if (html) dynamicPanel.style.display = 'block';
+
+            // 给新元素绑定更新情节数事件
+            setTimeout(() => {
+                document.querySelectorAll('#specialContent input, #specialContent select').forEach(el => {
+                    el.removeEventListener('change', updatePlotCountOnly);
+                    el.addEventListener('change', updatePlotCountOnly);
+                });
+                document.querySelectorAll('#specialContent input[type=number]').forEach(el => {
+                    el.removeEventListener('input', updatePlotCountOnly);
+                    el.addEventListener('input', updatePlotCountOnly);
+                });
+            }, 20);
+        }
+
+        // ---------- 核心处罚映射 ----------
+        function getPenalty(vioIdx, netPlot, specialFlags) {
+            const p = netPlot;
+            if (vioIdx === 0) {
+                const alc = specialFlags.alcohol;
+                if (alc >= 80) return '处吊销机动车驾驶证，并处1500以上2000以下罚款';
+                if (alc >= 50) return '处暂扣6个月机动车驾驶证，并处1500以上2000以下罚款';
+                return p <= 0 ? '处暂扣6个月驾驶证，并处1000以上1500以下罚款' : '处暂扣6个月驾驶证，并处1500以上2000以下罚款';
+            }
+            if (vioIdx === 1) {
+                const alc = specialFlags.alcohol;
+                if (alc >= 80) return '处10日拘留，并处1500以上2000以下罚款，吊销驾驶证';
+                if (alc >= 50) return p <= 0 ? '处3-7日拘留，1500-2000罚款，吊销驾驶证' : '处7-10日拘留，1500-2000罚款，吊销驾驶证';
+                if (p <= 0) return '处3日以下拘留，1000-1500罚款，吊销驾驶证';
+                if (p === 1) return '处3-7日拘留，1500-2000罚款，吊销驾驶证';
+                return '处7-10日拘留，1500-2000罚款，吊销驾驶证';
+            }
+            if (vioIdx === 2) {
+                if (specialFlags.army) return '处200以上1000以下罚款';
+                if (p < -1) return '处200以上1000以下罚款';
+                if (p === -1) return '处1000以上2000以下罚款';
+                if (p === 0 || p === 1) return '处1000-2000罚款，并处5日以下拘留';
+                if (p === 2) return '处1000-2000罚款，并处5-10日拘留';
+                return '处1500-2000罚款，并处10-15日拘留';
+            }
+            if (vioIdx === 3) {
+                if (specialFlags.army) return '处200以上500以下罚款';
+                if (p < 0) return '处200-500罚款';
+                if (p === 0) return '处500-1000罚款';
+                if (p === 1 || p === 2) return '处1000-2000罚款';
+                return '处1000-2000罚款，并处吊销驾驶证';
+            }
+            if (vioIdx === 4) {
+                if (p <= 0) return '予以收缴，扣留机动车，处5日以下拘留，并处2000-3000罚款';
+                if (p <= 2) return '予以收缴，扣留机动车，处5-10日拘留，并处3000-4000罚款';
+                return '予以收缴，扣留机动车，处10-15日拘留，并处4000-5000罚款';
+            }
+            if (vioIdx === 5) {
+                if (p <= 0) return '予以收缴，扣留机动车，处3日以下拘留，并处1000-2000罚款';
+                if (p <= 2) return '予以收缴，扣留机动车，处3-7日拘留，并处2000-3000罚款';
+                return '予以收缴，扣留机动车，处7-10日拘留，并处2000-3000罚款';
+            }
+            if (vioIdx === 6) {
+                if (p <= 0) return '予以收缴，扣留机动车，处2000-3000罚款';
+                if (p <= 2) return '予以收缴，扣留机动车，处3000-4000罚款';
+                return '予以收缴，扣留机动车，处4000-5000罚款';
+            }
+            if (vioIdx === 7) {
+                if (specialFlags.accident8) return '处1000罚款';
+                if (p <= 0) return '处200-500罚款';
+                if (p <= 2) return '处500-1000罚款';
+                return '处1000罚款';
+            }
+            if (vioIdx === 8) {
+                const isMinor = specialFlags.escapeMinor;
+                if (isMinor) {
+                    if (p < 0) return '处200-1000罚款';
+                    if (p === 0) return '处1000-2000罚款';
+                    if (p === 1) return '处1000-2000罚款，并处5日以下拘留';
+                    return '处1000-2000罚款，并处5-10日拘留';
+                } else {
+                    if (p < 0) return '处1000-2000罚款，并处5日以下拘留';
+                    if (p === 0 || p === 1) return '处1000-2000罚款，并处5-10日拘留';
+                    return '处1000-2000罚款，并处10-15日拘留';
+                }
+            }
+            if (vioIdx === 9) {
+                let base = '超过规定时速50%的，处500元罚款；每多超5公里加处200元，最高2000元；造成交通事故的处2000元罚款';
+                return specialFlags.speedSpecial ? base + '，并处吊销机动车驾驶证' : base;
+            }
+            if (vioIdx === 10) {
+                const minor = specialFlags.forceMinor;
+                if (minor) {
+                    if (p < 0) return '处200-1000罚款';
+                    if (p === 0) return '处1000-2000罚款';
+                    if (p === 1) return '处1000-2000罚款，并处5日以下拘留';
+                    return '处1000-2000罚款，并处5-10日拘留';
+                } else {
+                    if (p < 0) return '处1000-2000罚款，并处5日以下拘留';
+                    if (p === 0 || p === 1) return '处1000-2000罚款，并处5-10日拘留';
+                    return '处1000-2000罚款，并处10-15日拘留';
+                }
+            }
+            if (vioIdx === 11) {
+                const isMotor = specialFlags.controlMotor;
+                if (!isMotor) {
+                    if (p < 1) return '处200-1000罚款';
+                    if (p === 1) return '处1000-2000罚款';
+                    if (p === 2) return '处1000-2000罚款，并处5日以下拘留';
+                    return '处1000-2000罚款，并处5-10日拘留';
+                } else {
+                    if (p < 0) return '处200-1000罚款';
+                    if (p === 0) return '处1000-2000罚款';
+                    if (p === 1) return '处1000-2000罚款，并处5日以下拘留';
+                    if (p === 2) return '处1000-2000罚款，并处5-10日拘留';
+                    return '处1500-2000罚款，并处10-15日拘留';
+                }
+            }
+            // 12-18 精确映射
+            if (vioIdx === 12) {
+                if (p <= 0) return '处200-1000罚款';
+                if (p === 1) return '处1000-2000罚款';
+                if (p === 2) return '处1000-2000罚款，并处7日以下拘留';
+                return '处1000-2000罚款，并处7-15日拘留';
+            }
+            if (vioIdx === 13) {
+                if (p <= 0) return '处200-1000罚款';
+                if (p === 1) return '处1000-2000罚款';
+                if (p === 2) return '处1000-2000罚款，并处7日以下拘留';
+                return '处1000-2000罚款，并处7-15日拘留';
+            }
+            if (vioIdx === 14) {
+                if (p <= 0) return '处200-500罚款，并处吊销驾驶证';
+                if (p === 1 || p === 2) return '处500-1000罚款，并处吊销驾驶证';
+                return '处1000-2000罚款，并处吊销驾驶证';
+            }
+            if (vioIdx === 15) {
+                if (p <= 0) return '没收违法所得，并处10000-12000罚款';
+                if (p === 1 || p === 2) return '没收违法所得，并处12000-16000罚款';
+                return '没收违法所得，并处16000-20000罚款';
+            }
+            if (vioIdx === 16) {
+                if (p <= 0) return '处5倍以上6倍以下罚款，依法撤销检验资格';
+                if (p === 1 || p === 2) return '处6倍以上8倍以下罚款，依法撤销检验资格';
+                return '处8倍以上10倍以下罚款，依法撤销检验资格';
+            }
+            if (vioIdx === 17) {
+                if (p <= 0) return '强制拆除，予以收缴，处200-500罚款';
+                if (p === 1 || p === 2) return '强制拆除，予以收缴，处500-1000罚款';
+                return '强制拆除，予以收缴，处1000-2000罚款';
+            }
+            return '请完整选择情节';
+        }
+
+        function gatherSpecialFlags() {
+            const vioIdx = parseInt(selectEl.value);
+            let flags = {};
+            if (vioIdx === 0 || vioIdx === 1) {
+                flags.alcohol = parseFloat(document.getElementById('alcoholInput')?.value) || 0;
+            }
+            if (vioIdx === 2 || vioIdx === 3) {
+                flags.army = document.getElementById('special_army')?.checked || false;
+            }
+            if (vioIdx === 7) {
+                flags.accident8 = document.getElementById('special_accident8')?.checked || false;
+            }
+            if (vioIdx === 8) {
+                flags.escapeMinor = document.getElementById('escMinor')?.checked || false;
+            }
+            if (vioIdx === 9) {
+                flags.speedSpecial = [...document.querySelectorAll('.speed-special:checked')].length > 0;
+            }
+            if (vioIdx === 10) {
+                flags.forceMinor = document.querySelector('input[name="forceType"]:checked')?.value === 'minor';
+            }
+            if (vioIdx === 11) {
+                flags.controlMotor = document.querySelector('input[name="controlType"]:checked')?.value === 'motor';
+            }
+            return flags;
+        }
+
+        // 点击计算按钮：显示处罚标准
+        function calculateAndDisplayResult() {
+            const vioIdx = parseInt(selectEl.value);
+            const netPlot = getNetPlotCount();
+            plotCountDisplay.textContent = `裁量情节数: ${netPlot}`;
+            const flags = gatherSpecialFlags();
+            const penalty = getPenalty(vioIdx, netPlot, flags);
+            penaltyDisplay.textContent = penalty || '无法确定处罚，请检查情节';
+        }
+
+        calcBtn.addEventListener('click', calculateAndDisplayResult);
+
+        // 初始化：默认选中第1项，重置界面
+        (function initialize() {
+            selectEl.value = '0';
+            resetAllOptions();
+            updatePlotCountOnly();
+        })();
+
+    })();
+</script>
+</body>
+</html>
